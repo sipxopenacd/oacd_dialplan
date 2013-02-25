@@ -1,0 +1,25 @@
+<!-- Sample Freeswitch oacd_dialplan configuration -->
+
+<context name="default">
+
+  <!-- Log-in / Go Available -->
+  <extension name="oa_login">
+    <condition field="destination_number" expression="^\*87$">
+      <action application="answer"/>
+      <!-- Change 'opancd@127.0.0.1' to the proper node name -->
+      <action application="erlang_sendmsg" data="oacd_dialplan_listener openacd@127.0.0.1 agent_login ${sip_from_user}"/>
+      <action application="hangup" data="NORMAL CLEARING"/>
+    </condition>
+  </extension>
+
+  <!-- Log-out -->
+  <extension name="logoff">
+    <condition field="destination_number" expression="^\*91$">
+      <action application="answer"/>
+      <!-- Change 'opancd@127.0.0.1' to the proper node name -->
+      <action application="erlang_sendmsg" data="oacd_dialplan_listener openacd@127.0.0.1 agent_logout ${sip_from_user}"/>
+      <action application="hangup" data="NORMAL CLEARING"/>
+    </condition>
+  </extension>
+
+</context>

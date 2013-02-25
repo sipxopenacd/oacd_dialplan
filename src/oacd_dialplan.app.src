@@ -1,0 +1,13 @@
+{application, oacd_dialplan,
+ [
+  {description, "OpenACD Agent Dialplan Session Plug-in"},
+  {vsn, "2.0.0"},
+  {registered, [oacd_dialplan_sup, oacd_dialplan_listener]},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  freeswitch
+                 ]},
+  {mod, { oacd_dialplan_app, []}},
+  {env, []}
+ ]}.
