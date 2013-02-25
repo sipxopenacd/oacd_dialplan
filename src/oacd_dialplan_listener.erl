@@ -54,19 +54,18 @@ set_timeout(TMs) ->
 %% gen_server callbacks
 
 init([]) ->
-	TMs = p_get_env(timeout_ms, ?DEFAULT_TIMEOUT_MS),
-
+	TMs = p_as_timeout_ms(p_get_env(timeout_ms, ?DEFAULT_TIMEOUT_MS)),
 	{ok, #state{timeout_ms=TMs}}.
 
 handle_call(stop, _From, State) ->
-	{stop, normal, stopped, State};
+	{stop, normal, ok, State};
 handle_call(get_timeout, _From, State) ->
 	{reply, State#state.timeout_ms, State};
 handle_call(_Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast({set_timeout, TMs}, State) ->
-	{noreply, State#state{timeout_ms=TMs}};
+	{noreply, State#state{timeout_ms=p_as_timeout_ms(TMs)}};
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
@@ -110,3 +109,6 @@ p_get_env(K, Def) ->
 		{ok, V} -> V;
 		_ -> Def
 	end.
+
+p_as_timeout_ms(N) when is_integer(N), N > 0 -> N;
+p_as_timeout_ms(_) -> none.

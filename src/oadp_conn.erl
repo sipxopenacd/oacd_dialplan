@@ -28,7 +28,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -record(state, {
-	timeout_ms = ?DEFAULT_TIMEOUT_MS :: integer(),
+	timeout_ms :: integer(),
 	tref :: reference()
 }).
 
@@ -46,15 +46,17 @@ stop(Pid) ->
 %% gen_server callbacks
 
 init(Opts) ->
-	TMs = proplists:get_value(timeout_ms, Opts, 10000),
-	TRef = erlang:start_timer(TMs, self(), timeout),
-	lager:info("timeout: ~p", [TMs]),
+	TMs = proplists:get_value(timeout_ms, Opts, ?DEFAULT_TIMEOUT_MS),
+
+	St = #state{timeout_ms=TMs},
+	St1 = p_reset_timer(St),
+
 	gproc:add_local_property(?MODULE, undefined),
 
-	{ok, #state{tref=TRef, timeout_ms=TMs}}.
+	{ok, St1}.
 
 handle_call(stop, _From, State) ->
-	{stop, normal, stopped, State};
+	{stop, normal, ok, State};
 
 handle_call(_Request, _From, State) ->
 	{reply, ok, State}.
@@ -90,7 +92,9 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% internal
 
-p_reset_timer(St=#state{tref=TRef0, timeout_ms=TMs}) ->
+p_reset_timer(St=#state{tref=TRef0, timeout_ms=TMs}) when is_integer(TMs), TMs > 0 ->
 	catch erlang:cancel_timer(TRef0),
 	TRef = erlang:start_timer(TMs, self(), timeout),
-	St#state{tref=TRef}.
+	St#state{tref=TRef};
+p_reset_timer(St) ->
+	St.

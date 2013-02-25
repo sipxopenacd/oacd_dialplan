@@ -1,2 +1,2 @@
-%% Default session timeout - 30 minutes
--define(DEFAULT_TIMEOUT_MS, 1800000).
+%% Default session timeout - none (may be an integer)
+-define(DEFAULT_TIMEOUT_MS, none).
